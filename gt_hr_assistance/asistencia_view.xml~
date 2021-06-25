@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+    <record id="view_lectura_biometrico" model="ir.ui.view">
+        <field name="name">Lectura Biometrico</field>
+        <field name="model">lectura.biometrico</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+          <form string="Lecturas">
+	    <group>
+	      <button name="load_marcaciones" string="Cargar" type="object" icon="gtk-execute"/>
+	    </group>
+            <group>
+	      <field name="fecha" required="2"/>
+	    </group>
+          </form>
+        </field>
+      </record>
+
+    
+    <record id="view_lectura_biometrico_tree" model="ir.ui.view">
+    	<field name="name">lectura.biometrico.tree</field>
+    	<field name="model">lectura.biometrico</field>
+    	<field name="type">tree</field>
+    	<field name="arch" type="xml">
+    	  <tree string="Lectura">
+    	   	<field name="cedula"/>
+    	   	<field name="nombre"/>
+        	<field name="fecha_hora"/>
+        	<field name="planta"/>
+    	  </tree>
+    	</field>
+    </record>     
+    
+    <record id="action_marcaciones" model="ir.actions.act_window">
+      <field name="name">Registro asistencias</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">lectura.biometrico</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    
+    <menuitem id="menu_marcacion_asistencia"
+  		action="action_marcaciones"
+  		parent="hr.menu_hr_main"
+  		sequence="14"
+  		groups="base.group_hr_manager"
+  		name="Registro asistencia"/>
+  </data>
+</openerp>

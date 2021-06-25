@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<openerp>
+  <data>
+    <record id="view_lectura_biometrico" model="ir.ui.view">
+        <field name="name">Lectura Biometrico</field>
+        <field name="model">mdl.extras</field>
+        <field name="view_mode">tree,form</field>
+        <field name="arch" type="xml">
+          <form string="Lecturas">
+			<group>
+				<button name="calcular_extras" string="Calcular Horas" type="object" icon="gtk-execute"/>
+				<button name="calcular_salario_extras" string="Exportar Horas Extras" type="object" icon="gtk-execute"/>
+			</group>
+			<group>
+				<field name="fecha" required="2"/>
+			</group>
+			<notebook colspan="4">
+				<page string="Detalle Asistencia">
+					<field name="lectura_id" nolabel="1">
+					<tree string="Horas Extra">
+						<field name="cedula" readonly="1"/>
+						<field name="nombre" readonly="1"/>
+						<field name="dep_superior" readonly="1"/>
+						<field name="departamento" readonly="1"/>
+						<field name="fecha" readonly="1"/>
+						<field name="dia" readonly="1"/>
+						<field name="horas_trabajadas" readonly="1"/>
+						<field name="horas_faltantes" readonly="1"/>
+						<field name="horas_extras" readonly="1"/>
+					</tree>
+					</field>
+				</page>
+			</notebook>
+          </form>
+        </field>
+    </record>
+    
+    <record id="view_lectura_biometrico_tree" model="ir.ui.view">
+    	<field name="name">mdl.extras.tree</field>
+    	<field name="model">mdl.extras</field>
+    	<field name="type">tree</field>
+    	<field name="arch" type="xml">
+    	  <tree string="Lectura">
+    	   	<field name="fecha"/>
+    	  </tree>
+    	</field>
+    </record>     
+    
+    <record id="action_marcaciones" model="ir.actions.act_window">
+      <field name="name">Registro asistencias</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">mdl.extras</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+    
+	<menuitem id="assistance_menu" name="Registro Horas Extras" parent="hr.menu_hr_main" sequence="15"/>
+		<menuitem id="menu_marcacion_asistencia"
+  		action="action_marcaciones"
+  		parent="assistance_menu"
+  		sequence="2"
+  		groups="base.group_hr_manager"
+  		name="Registro Extras"/>
+
+  </data>
+</openerp>

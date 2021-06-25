@@ -1,0 +1,117 @@
+from datetime import datetime
+from osv import osv, fields
+import time
+
+class mdlRegistroAsistencia(osv.Model):
+    _name = 'mdl.registro.asistencia'
+    _columns = dict(
+	employee_id = fields.many2one('hr.employee', 'Empleado'),
+        cedula=fields.char('Cedula',size=15),
+        nombre=fields.char('Nombre',size=50),
+        departamento = fields.char('Departamento',size=70),
+        fecha=fields.date('Fecha',size=32),
+        hora_inicio = fields.char('Hora Inicico',size=5),
+        hora_fin = fields.char('Hora Fin',size=5),
+        almuerzo_inicio=fields.char('Almuerzo Inicio',size=5),
+        almuerzo_fin=fields.char('Almuerzo Fin',size=5),
+    )
+mdlRegistroAsistencia()
+
+class mdlGrupoTrabajo(osv.Model):
+    _name = 'mdl.grupo.trabajo'
+    _columns = dict(
+        departamento=fields.char('Departamento',size=50),
+        grupo=fields.char('Grupo',size=50),
+        hora_inicio=fields.char('Hora Inicio',size=32),
+        hora_fin=fields.char('Hora Fin',size=32),
+        almuerzo_inicio=fields.char('Almuerzo Inicio',size=15),
+        almuerzo_fin=fields.char('Almuerzo Fin',size=15),
+    )
+mdlGrupoTrabajo()
+
+class mdlAsistencia(osv.Model):
+    _name = 'mdl.asistencia'
+    _columns = dict(
+        nombre=fields.char('Nombre',size=50),
+        cedula=fields.char('Cedula',size=15),
+        fecha=fields.date('Fecha',size=32),
+        fecha_hora=fields.datetime('Hora',size=8),
+        planta=fields.char('Planta',size=50),
+    )
+mdlAsistencia()
+
+class lecturaBiometrico(osv.Model):
+    _name = 'lectura.biometrico'
+    _columns = dict(
+        #employee_id=fields.integer('employee_id',size=15),
+	employee_id = fields.many2one('hr.employee', 'Empleado'),
+        departamento = fields.char('Departamento',size=70),
+        cedula=fields.char('Cedula',size=15),
+        nombre=fields.char('Nombre',size=50),
+        fecha=fields.date('Fecha',size=32),
+        fecha_hora = fields.datetime('Fecha/Hora',size=32),
+        planta=fields.char('Planta',size=50),
+    )
+    
+    def cargar_marcaciones(self, cr, uid, ids, context=None):
+        #search    select
+        #update    update
+        #unlink    delete
+        #browse    objeto    
+
+        lectura_mdl = self.pool.get('lectura.biometrico')
+        asistencia_mdl = self.pool.get('mdl.asistencia')
+        employee_mdl = self.pool.get('hr.employee')
+        department_mdl = self.pool.get('hr.department')
+
+        for this in self.browse(cr, uid, ids):
+            asistencias = asistencia_mdl.search(cr, uid, [('fecha','=',str(this.fecha))])  #[1,3,4,6]
+             
+            if asistencias:
+                for asistencia_id in asistencias:
+
+                    asistencia = asistencia_mdl.browse(cr,uid, asistencia_id)
+
+                    employees = employee_mdl.search(cr, uid, [(str('name'),'=',str(asistencia.cedula))])
+
+                    aux_fecha = str(asistencia.fecha_hora[8:10]+'/'+asistencia.fecha_hora[5:7]+'/'+asistencia.fecha_hora[0:4])
+                    aux_fecha_hora = str(asistencia.fecha_hora[8:10]+'/'+asistencia.fecha_hora[5:7]+'/'+asistencia.fecha_hora[0:4]+' '+asistencia.fecha_hora[11:19])
+
+                    if employees:
+
+                		employee = employee_mdl.browse(cr,uid, employees[0])
+                		#dep = department_mdl.browse(cr,uid, employee.department_id)
+
+                            	lectura_mdl.create(cr,uid,{
+                                            'employee_id':employee.id,
+                                            'departamento':employee.department_id.name,
+                                            'cedula':asistencia.cedula,
+                                            'nombre':employee.complete_name,
+	                            	    'fecha':datetime.strptime(aux_fecha, '%d/%m/%Y'),
+	                            	    'fecha_hora':datetime.strptime(aux_fecha_hora, '%d/%m/%Y %H:%M:%S'),
+	                            	    'planta':asistencia.planta,
+	                        	 })
+		return True
+
+    def cargar_asistencias(self, cr, uid, ids, context=None): 
+
+        lectura_mdl = self.pool.get('lectura.biometrico')
+
+        asistencias = {}
+        deps = {}
+        l_asistencia = list()
+
+        for this in self.browse(cr, uid, ids):
+            lecturas = lectura_mdl.search(cr, uid, [('fecha','=',str(this.fecha))])  #[1,3,4,6]
+             
+            if lecturas:
+                for lectura_id in lecturas:
+
+                    lectura = lectura_mdl.browse(cr,uid, lectura_id)
+
+                    lectura_mdl.create(cr,uid,{
+                        'departamento':lectura.cedula,
+                    })
+		return True
+
+lecturaBiometrico()
